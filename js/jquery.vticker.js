@@ -19,7 +19,8 @@
     margin: 0,
     padding: 0,
     startPaused: false,
-    autoAppend: true
+    autoAppend: true,
+    removeElement: null
   };
   internal = {
     moveUp: function(state, attribs) {
@@ -87,6 +88,12 @@
       var options, state;
       state = $(this).data('state');
       options = state.options;
+      
+      // vTicker working 체크로 인해 status null 방지 
+      if(state === null) {
+        return;
+      }
+      
       if (state.isPaused || internal.hasSingleItem(state)) {
         return;
       }
@@ -253,15 +260,35 @@
       state = internal.getState('stop', this);
       return internal.stopInterval.call(this);
     },
+    // vTicker working 체크 
+    work: function() {
+      var flag = false;
+      var state;
+      state = this.data('state');
+      
+      if(typeof state !== 'undefined' && state !== null) {
+        flag = true;
+      }
+      return flag;
+    },
     remove: function() {
-      var el, state;
-      state = internal.getState('remove', this);
-      internal.stopInterval.call(this);
-      el = state.element;
-      el.unbind();
-      return el.remove();
-    }
-  };
+        var el, state;
+        state = internal.getState('remove', this);
+        internal.stopInterval.call(this);
+        el = state.element;
+        el.data('state', null).unbind();
+        
+        // vTicker 하위 element 삭제
+        if(state.options.removeElement !== null) {
+          el.find(state.options.removeElement).empty();
+        }
+        else {
+          el.empty();  
+        }
+        
+        return el;
+      }
+    };
   return $.fn.vTicker = function(method) {
     if (methods[method]) {
       return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
