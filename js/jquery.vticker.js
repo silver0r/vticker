@@ -87,16 +87,13 @@
     nextUsePause: function() {
       var options, state;
       state = $(this).data('state');
+      
+      if (state === null || state.isPaused || internal.hasSingleItem(state)) {
+        return;
+      }
+      
       options = state.options;
       
-      // vTicker working 체크로 인해 status null 방지 
-      if(state === null) {
-        return;
-      }
-      
-      if (state.isPaused || internal.hasSingleItem(state)) {
-        return;
-      }
       return methods.next.call(this, {
         animate: options.animate
       });
